@@ -1,10 +1,33 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module } from '@nestjs/common'
+import { MongooseModule } from '@nestjs/mongoose'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { MessagesModule } from './messages/messages.module'
+import { AuthModule } from './auth/auth.module'
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env'],
+    }),
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const mongoUri = configService.get<string>('MONGO_URI')
+        if (!mongoUri) {
+          throw new Error('MONGO_URI environment variable is not defined')
+        }
+        return {
+          uri: mongoUri,
+        }
+      },
+    }),
+    MessagesModule,
+    AuthModule.forRoot({
+      disableExceptionFilter: true,
+    }),
+  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
