@@ -1,23 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, FilterQuery } from 'mongoose'
-import { Log, LogDocument } from './schemas/log.schema'
+import { Message, MessageDocument } from './schemas/message.schema'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { GetMessagesQueryDto } from './dto/get-messages-query.dto'
 import { StatsQueryDto } from './dto/stats-query.dto'
 
 @Injectable()
-// Renamed from LogsService to MessagesService
 export class MessagesService {
-  constructor(@InjectModel(Log.name) private logModel: Model<LogDocument>) {}
+  constructor(
+    @InjectModel(Message.name) private MessagesModel: Model<MessageDocument>
+  ) {}
 
-  async create(createMessageDto: CreateMessageDto): Promise<Log> {
-    const created = new this.logModel(createMessageDto)
+  async create(createMessageDto: CreateMessageDto): Promise<Message> {
+    const created = new this.MessagesModel(createMessageDto)
     return created.save()
   }
 
-  async findAll(query?: GetMessagesQueryDto): Promise<Log[]> {
-    const filter: FilterQuery<LogDocument> = {}
+  async findAll(query?: GetMessagesQueryDto): Promise<Message[]> {
+    const filter: FilterQuery<MessageDocument> = {}
     if (query?.sensorId) filter.sensorId = query.sensorId
     if (query?.start || query?.end) {
       const timeFilter: Record<string, Date> = {}
@@ -25,21 +26,21 @@ export class MessagesService {
       if (query.end) timeFilter.$lte = new Date(query.end)
       filter.timestamp = timeFilter as any
     }
-    return this.logModel.find(filter).exec()
+    return this.MessagesModel.find(filter).exec()
   }
 
-  async findBySensor(sensorId: string): Promise<Log[]> {
-    return this.logModel.find({ sensorId }).exec()
+  async findBySensor(sensorId: string): Promise<Message[]> {
+    return this.MessagesModel.find({ sensorId }).exec()
   }
 
-  async findOne(id: string): Promise<Log> {
-    const log = await this.logModel.findById(id).exec()
-    if (!log) throw new NotFoundException(`Message #${id} not found`)
-    return log
+  async findOne(id: string): Promise<Message> {
+    const Message = await this.MessagesModel.findById(id).exec()
+    if (!Message) throw new NotFoundException(`Message #${id} not found`)
+    return Message
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.logModel.findByIdAndDelete(id).exec()
+    const result = await this.MessagesModel.findByIdAndDelete(id).exec()
     if (!result) throw new NotFoundException(`Message #${id} not found`)
   }
 
@@ -52,7 +53,7 @@ export class MessagesService {
       if (query.start) match.timestamp.$gte = new Date(query.start)
       if (query.end) match.timestamp.$lte = new Date(query.end)
     }
-    const result = await this.logModel.aggregate([
+    const result = await this.MessagesModel.aggregate([
       { $match: match },
       {
         $group: {
@@ -83,7 +84,7 @@ export class MessagesService {
       if (query.start) match.timestamp.$gte = new Date(query.start)
       if (query.end) match.timestamp.$lte = new Date(query.end)
     }
-    const result = await this.logModel.aggregate([
+    const result = await this.MessagesModel.aggregate([
       { $match: match },
       {
         $group: {
