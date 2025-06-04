@@ -6,7 +6,7 @@ export type MessageDocument = Message & Document
 @Schema({ timestamps: true })
 export class Message {
   @Prop({ required: true })
-  sensorId: string
+  deviceId: string
 
   @Prop({ required: true })
   temperature: number

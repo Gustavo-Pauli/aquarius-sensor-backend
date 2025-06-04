@@ -2,7 +2,7 @@ import { IsEmail, IsNumber, IsOptional } from 'class-validator'
 
 export class CreateAlertDto {
   @IsOptional()
-  sensorId?: string
+  deviceId?: string
 
   @IsNumber()
   threshold: number

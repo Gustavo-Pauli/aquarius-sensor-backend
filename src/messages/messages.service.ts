@@ -19,7 +19,7 @@ export class MessagesService {
     const saved = await created.save()
     // check alerts and send notifications if needed
     await this.alertsService.checkAndNotify({
-      sensorId: saved.sensorId,
+      deviceId: saved.deviceId,
       temperature: saved.temperature,
       timestamp: saved.timestamp,
     })
@@ -28,7 +28,7 @@ export class MessagesService {
 
   async findAll(query?: GetMessagesQueryDto): Promise<Message[]> {
     const filter: FilterQuery<MessageDocument> = {}
-    if (query?.sensorId) filter.sensorId = query.sensorId
+    if (query?.deviceId) filter.deviceId = query.deviceId
     if (query?.start || query?.end) {
       const timeFilter: Record<string, Date> = {}
       if (query.start) timeFilter.$gte = new Date(query.start)
@@ -38,8 +38,8 @@ export class MessagesService {
     return this.MessagesModel.find(filter).exec()
   }
 
-  async findBySensor(sensorId: string): Promise<Message[]> {
-    return this.MessagesModel.find({ sensorId }).exec()
+  async findBySensor(deviceId: string): Promise<Message[]> {
+    return this.MessagesModel.find({ deviceId }).exec()
   }
 
   async findOne(id: string): Promise<Message> {
@@ -84,10 +84,10 @@ export class MessagesService {
   }
 
   async statsBySensor(
-    sensorId: string,
+    deviceId: string,
     query?: StatsQueryDto
   ): Promise<{ min: number; max: number; avg: number; count: number }> {
-    const match: any = { sensorId }
+    const match: any = { deviceId }
     if (query?.start || query?.end) {
       match.timestamp = {}
       if (query.start) match.timestamp.$gte = new Date(query.start)

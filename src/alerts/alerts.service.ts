@@ -34,15 +34,15 @@ export class AlertsService {
   }
 
   async checkAndNotify(message: {
-    sensorId?: string
+    deviceId?: string
     temperature: number
     timestamp: Date
   }) {
     const query: any = { threshold: { $gt: message.temperature } }
-    if (message.sensorId) {
+    if (message.deviceId) {
       query.$or = [
-        { sensorId: { $exists: false } },
-        { sensorId: message.sensorId },
+        { deviceId: { $exists: false } },
+        { deviceId: message.deviceId },
       ]
     }
     const alerts = await this.alertModel.find(query).exec()
@@ -52,7 +52,7 @@ export class AlertsService {
           from: 'onboarding@resend.dev',
           to: alert.email,
           subject: `Alert: temp below ${alert.threshold}`,
-          html: `<p>Sensor ${message.sensorId || 'N/A'} reported ${message.temperature} at ${message.timestamp}. Below threshold ${alert.threshold}.</p>`,
+          html: `<p>Sensor ${message.deviceId || 'N/A'} reported ${message.temperature} at ${message.timestamp}. Below threshold ${alert.threshold}.</p>`,
         })
       } catch (err) {
         this.logger.error('Failed to send alert email', err)

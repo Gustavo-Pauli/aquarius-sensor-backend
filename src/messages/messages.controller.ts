@@ -44,12 +44,12 @@ export class MessagesController {
     return { min, max, avg, count }
   }
 
-  @Get('sensor/:sensorId/stats')
+  @Get('sensor/:deviceId/stats')
   async statsBySensor(
-    @Param('sensorId') sensorId: string,
+    @Param('deviceId') deviceId: string,
     @Query() query: GetMessagesQueryDto
   ): Promise<StatsResponse> {
-    const messages = await this.messagesService.findAll({ ...query, sensorId })
+    const messages = await this.messagesService.findAll({ ...query, deviceId })
     const temps = messages.map(msg => msg.temperature)
     const count = temps.length
     const min = count ? Math.min(...temps) : 0
@@ -58,9 +58,9 @@ export class MessagesController {
     return { min, max, avg, count }
   }
 
-  @Get('sensor/:sensorId')
-  async findBySensor(@Param('sensorId') sensorId: string): Promise<Message[]> {
-    return this.messagesService.findBySensor(sensorId)
+  @Get('sensor/:deviceId')
+  async findBySensor(@Param('deviceId') deviceId: string): Promise<Message[]> {
+    return this.messagesService.findBySensor(deviceId)
   }
 
   @Get(':id')

@@ -3,7 +3,7 @@ import { IsOptional, IsString, IsDateString } from 'class-validator'
 export class GetMessagesQueryDto {
   @IsOptional()
   @IsString()
-  sensorId?: string
+  deviceId?: string
 
   @IsOptional()
   @IsDateString()

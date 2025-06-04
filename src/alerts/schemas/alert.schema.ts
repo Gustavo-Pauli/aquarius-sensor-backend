@@ -6,7 +6,7 @@ export type AlertDocument = Alert & Document
 @Schema({ timestamps: true })
 export class Alert {
   @Prop({ required: false })
-  sensorId?: string
+  deviceId?: string
 
   @Prop({ required: true })
   threshold: number
