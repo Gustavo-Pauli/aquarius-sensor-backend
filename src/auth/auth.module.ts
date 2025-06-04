@@ -216,10 +216,10 @@ export class AuthModule implements NestModule, OnModuleInit {
             ...(isProd
               ? {
                   advanced: {
-                    crossSubDomainCookies: {
-                      enabled: true,
-                      domain: configService.get<string>('CROSS_DOMAIN_ORIGIN'),
-                    },
+                    // crossSubDomainCookies: {
+                    //   enabled: true,
+                    //   domain: configService.get<string>('CROSS_DOMAIN_ORIGIN'),
+                    // },
                     defaultCookieAttributes: {
                       secure: true,
                       httpOnly: true,
