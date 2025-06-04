@@ -222,7 +222,7 @@ export class AuthModule implements NestModule, OnModuleInit {
                     // },
                     defaultCookieAttributes: {
                       secure: true,
-                      httpOnly: true,
+                      httpOnly: false,
                       sameSite: 'none',
                       partitioned: true,
                     },

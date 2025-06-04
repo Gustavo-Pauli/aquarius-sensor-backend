@@ -24,6 +24,7 @@ export class MessagesController {
   @Public()
   @UseGuards(ApiKeyGuard)
   async create(@Body() createMessageDto: CreateMessageDto): Promise<Message> {
+    console.log('Creating message:', createMessageDto)
     return this.messagesService.create(createMessageDto)
   }
 
