@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Query,
+  UseGuards,
 } from '@nestjs/common'
 import { MessagesService } from './messages.service'
 import { CreateMessageDto } from './dto/create-message.dto'
@@ -13,6 +14,7 @@ import { Message } from './schemas/message.schema'
 import { GetMessagesQueryDto } from './dto/get-messages-query.dto'
 import { StatsResponse } from './dto/stats-response.dto'
 import { Public } from 'src/auth/decorators'
+import { ApiKeyGuard } from 'src/auth/api-key.guard'
 
 @Controller('messages')
 export class MessagesController {
@@ -20,6 +22,7 @@ export class MessagesController {
 
   @Post()
   @Public()
+  @UseGuards(ApiKeyGuard)
   async create(@Body() createMessageDto: CreateMessageDto): Promise<Message> {
     return this.messagesService.create(createMessageDto)
   }
