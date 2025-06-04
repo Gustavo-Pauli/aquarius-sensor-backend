@@ -5,16 +5,25 @@ import { Message, MessageDocument } from './schemas/message.schema'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { GetMessagesQueryDto } from './dto/get-messages-query.dto'
 import { StatsQueryDto } from './dto/stats-query.dto'
+import { AlertsService } from '../alerts/alerts.service'
 
 @Injectable()
 export class MessagesService {
   constructor(
-    @InjectModel(Message.name) private MessagesModel: Model<MessageDocument>
+    @InjectModel(Message.name) private MessagesModel: Model<MessageDocument>,
+    private alertsService: AlertsService
   ) {}
 
   async create(createMessageDto: CreateMessageDto): Promise<Message> {
     const created = new this.MessagesModel(createMessageDto)
-    return created.save()
+    const saved = await created.save()
+    // check alerts and send notifications if needed
+    await this.alertsService.checkAndNotify({
+      sensorId: saved.sensorId,
+      temperature: saved.temperature,
+      timestamp: saved.timestamp,
+    })
+    return saved
   }
 
   async findAll(query?: GetMessagesQueryDto): Promise<Message[]> {

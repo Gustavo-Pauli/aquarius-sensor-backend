@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { MessagesModule } from './messages/messages.module'
 import { AuthModule } from './auth/auth.module'
+import { AlertsModule } from './alerts/alerts.module'
+import { AppController } from './app.controller'
 
 @Module({
   imports: [
@@ -23,11 +25,10 @@ import { AuthModule } from './auth/auth.module'
       },
     }),
     MessagesModule,
-    AuthModule.forRoot({
-      disableExceptionFilter: true,
-    }),
+    AuthModule.forRoot({ disableExceptionFilter: true }),
+    AlertsModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
