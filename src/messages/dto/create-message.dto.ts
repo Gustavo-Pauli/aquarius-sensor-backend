@@ -4,7 +4,7 @@ import { Type } from 'class-transformer'
 // Renamed from CreateLogDto to CreateMessageDto
 export class CreateMessageDto {
   @IsString()
-  sensorId: string
+  deviceId: string
 
   @IsNumber()
   @Type(() => Number)
