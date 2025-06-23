@@ -117,6 +117,26 @@ export class AuthModule implements NestModule, OnModuleInit {
       // little hack to ignore any global prefix
       // for now i'll just not support a global prefix
       .use(`${basePath}/*splat`, (req: Request, res: Response) => {
+        // Add CORS headers to ALL auth requests
+        res.header('Access-Control-Allow-Origin', '*')
+        res.header(
+          'Access-Control-Allow-Methods',
+          'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
+        )
+        res.header(
+          'Access-Control-Allow-Headers',
+          'Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma'
+        )
+        res.header('Access-Control-Allow-Credentials', 'false')
+        res.header('Access-Control-Max-Age', '86400')
+
+        // Handle preflight requests immediately
+        if (req.method === 'OPTIONS') {
+          console.log(`AUTH OPTIONS request for ${req.url}`)
+          res.status(200).end()
+          return
+        }
+
         req.url = req.originalUrl
         return handler(req, res)
       })
