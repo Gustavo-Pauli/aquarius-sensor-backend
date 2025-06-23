@@ -90,25 +90,8 @@ export class AuthModule implements NestModule, OnModuleInit {
   }
 
   configure(consumer: MiddlewareConsumer) {
-    const trustedOrigins = this.auth.options.trustedOrigins
-    // function-based trustedOrigins requires a Request (from web-apis) object to evaluate, which is not available in NestJS (we only have a express Request object)
-    // if we ever need this, take a look at better-call which show an implementation for this
-    const isNotFunctionBased = trustedOrigins && Array.isArray(trustedOrigins)
-
-    if (!this.options.disableTrustedOriginsCors && isNotFunctionBased) {
-      this.adapter.httpAdapter.enableCors({
-        origin: trustedOrigins,
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        credentials: true,
-      })
-    } else if (
-      trustedOrigins &&
-      !this.options.disableTrustedOriginsCors &&
-      !isNotFunctionBased
-    )
-      throw new Error(
-        'Function-based trustedOrigins not supported in NestJS. Use string array or disable CORS with disableTrustedOriginsCors: true.'
-      )
+    // Completely disable all CORS handling in auth module
+    // CORS is handled in main.ts only
 
     if (!this.options.disableBodyParser) {
       consumer.apply(SkipBodyParsingMiddleware).forRoutes('{*path}')
