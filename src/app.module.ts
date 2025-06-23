@@ -25,7 +25,10 @@ import { AppController } from './app.controller'
       },
     }),
     MessagesModule,
-    AuthModule.forRoot({ disableExceptionFilter: true }),
+    AuthModule.forRoot({
+      disableExceptionFilter: true,
+      disableTrustedOriginsCors: true,
+    }),
     AlertsModule,
   ],
   controllers: [AppController],
