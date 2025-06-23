@@ -90,9 +90,6 @@ export class AuthModule implements NestModule, OnModuleInit {
   }
 
   configure(consumer: MiddlewareConsumer) {
-    // Completely disable all CORS handling in auth module
-    // CORS is handled in main.ts only
-
     if (!this.options.disableBodyParser) {
       consumer.apply(SkipBodyParsingMiddleware).forRoutes('{*path}')
     }
@@ -110,32 +107,12 @@ export class AuthModule implements NestModule, OnModuleInit {
       basePath = basePath.slice(0, -1)
     }
 
+    // Create the better-auth handler
     const handler = toNodeHandler(this.auth)
 
-    this.adapter.httpAdapter
-      .getInstance()
-      // Handle auth routes with a more specific pattern
-      .use(basePath, (req: Request, res: Response, next: any) => {
-        // Add CORS headers to ALL auth requests
-        res.header('Access-Control-Allow-Origin', '*')
-        res.header(
-          'Access-Control-Allow-Methods',
-          'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
-        )
-        res.header('Access-Control-Allow-Headers', '*')
-        res.header('Access-Control-Allow-Credentials', 'false')
-        res.header('Access-Control-Max-Age', '86400')
+    // Mount the handler directly - let better-auth handle everything
+    this.adapter.httpAdapter.getInstance().use(basePath + '/*', handler)
 
-        // Handle preflight requests immediately
-        if (req.method === 'OPTIONS') {
-          console.log(`AUTH OPTIONS request for ${req.url}`)
-          res.status(200).end()
-          return
-        }
-
-        // Don't manipulate the URL, let better-auth handle it
-        return handler(req, res)
-      })
     this.logger.log(`AuthModule initialized BetterAuth on '${basePath}/*'`)
   }
 
