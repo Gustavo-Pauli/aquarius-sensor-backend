@@ -114,19 +114,15 @@ export class AuthModule implements NestModule, OnModuleInit {
 
     this.adapter.httpAdapter
       .getInstance()
-      // little hack to ignore any global prefix
-      // for now i'll just not support a global prefix
-      .use(`${basePath}/*splat`, (req: Request, res: Response) => {
+      // Handle auth routes with a more specific pattern
+      .use(basePath, (req: Request, res: Response, next: any) => {
         // Add CORS headers to ALL auth requests
         res.header('Access-Control-Allow-Origin', '*')
         res.header(
           'Access-Control-Allow-Methods',
           'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'
         )
-        res.header(
-          'Access-Control-Allow-Headers',
-          'Origin,X-Requested-With,Content-Type,Accept,Authorization,Cache-Control,Pragma'
-        )
+        res.header('Access-Control-Allow-Headers', '*')
         res.header('Access-Control-Allow-Credentials', 'false')
         res.header('Access-Control-Max-Age', '86400')
 
@@ -137,10 +133,10 @@ export class AuthModule implements NestModule, OnModuleInit {
           return
         }
 
-        req.url = req.originalUrl
+        // Don't manipulate the URL, let better-auth handle it
         return handler(req, res)
       })
-    this.logger.log(`AuthModule initialized BetterAuth on '${basePath}/*splat'`)
+    this.logger.log(`AuthModule initialized BetterAuth on '${basePath}/*'`)
   }
 
   // biome-ignore lint/complexity/noBannedTypes: <explanation>
