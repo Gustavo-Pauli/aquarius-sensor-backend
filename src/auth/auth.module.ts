@@ -166,6 +166,12 @@ export class AuthModule implements NestModule, OnModuleInit {
    * @param options - Configuration options for the module
    */
   static forRoot(options: AuthModuleOptions = {}) {
+    // Force disable ALL CORS in auth module to avoid conflicts with main.ts CORS
+    const authOptions = {
+      ...options,
+      disableTrustedOriginsCors: true, // Completely disable auth module CORS
+    }
+
     const providers: Provider[] = [
       {
         provide: AUTH_INSTANCE_KEY,
@@ -234,12 +240,12 @@ export class AuthModule implements NestModule, OnModuleInit {
       },
       {
         provide: AUTH_MODULE_OPTIONS_KEY,
-        useValue: options,
+        useValue: authOptions,
       },
       AuthService,
     ]
 
-    if (!options.disableExceptionFilter) {
+    if (!authOptions.disableExceptionFilter) {
       providers.push({
         provide: APP_FILTER,
         useClass: APIErrorExceptionFilter,
