@@ -21,14 +21,14 @@ async function bootstrap() {
     const configService = app.get(ConfigService)
     const port = configService.get<number>('PORT') ?? 3000
 
-    const trustedOrigins = process.env.TRUSTED_ORIGINS
-      ? (process.env.TRUSTED_ORIGINS as string).split(',')
-      : ['*']
+    // const trustedOrigins = process.env.TRUSTED_ORIGINS
+    //   ? (process.env.TRUSTED_ORIGINS as string).split(',')
+    //   : ['*']
 
-    app.enableCors({
-      origin: trustedOrigins,
-      credentials: true,
-    })
+    // app.enableCors({
+    //   origin: trustedOrigins,
+    //   credentials: true,
+    // })
 
     await app.listen(port, '0.0.0.0')
     console.log(`Application is running on http://0.0.0.0:${port}`)
