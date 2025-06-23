@@ -14,14 +14,40 @@ async function bootstrap() {
 
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
       bodyParser: false,
-      // Completely disable CORS here - let better-auth handle it
+    })
+
+    // Enable CORS with specific configuration
+    app.enableCors({
+      origin: (origin, callback) => {
+        const configService = app.get(ConfigService)
+        const trustedOriginsEnv = configService.get<string>(
+          'TRUSTED_ORIGINS',
+          ''
+        )
+        const trustedOrigins = trustedOriginsEnv
+          ? trustedOriginsEnv.split(',')
+          : []
+
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true)
+
+        // Check if the origin is in the trusted origins list
+        if (trustedOrigins.includes(origin)) {
+          return callback(null, true)
+        }
+
+        callback(new Error('Not allowed by CORS'))
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
     })
 
     app.set('query parser', 'extended')
     app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }))
 
     const configService = app.get(ConfigService)
-    const port = configService.get<number>('PORT') ?? 3000
+    const port = configService.get<number>('PORT') ?? 8000
 
     await app.listen(port, '0.0.0.0')
     console.log(`Application is running on http://0.0.0.0:${port}`)

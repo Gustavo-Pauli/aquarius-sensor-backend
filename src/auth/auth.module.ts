@@ -9,12 +9,11 @@ import {
   APP_FILTER,
   DiscoveryModule,
   DiscoveryService,
-  HttpAdapterHost,
   MetadataScanner,
 } from '@nestjs/core'
 import { createAuthMiddleware } from 'better-auth/plugins'
-import { toNodeHandler } from 'better-auth/node'
 import { AuthService } from './auth.service'
+import { AuthController } from './auth.controller'
 import {
   BEFORE_HOOK_KEY,
   AFTER_HOOK_KEY,
@@ -24,7 +23,6 @@ import {
 } from './symbols'
 import { APIErrorExceptionFilter } from './api-error-exception-filter'
 import { SkipBodyParsingMiddleware } from './middlewares'
-import type { Request, Response } from 'express'
 import { betterAuth, type Auth } from 'better-auth'
 import { MongoClient } from 'mongodb'
 import { mongodbAdapter } from 'better-auth/adapters/mongodb'
@@ -53,6 +51,7 @@ const isProd = process.env.NODE_ENV === 'production'
 @Global()
 @Module({
   imports: [DiscoveryModule],
+  controllers: [AuthController],
 })
 export class AuthModule implements NestModule, OnModuleInit {
   private logger = new Logger(AuthModule.name)
@@ -62,8 +61,6 @@ export class AuthModule implements NestModule, OnModuleInit {
     private discoveryService: DiscoveryService,
     @Inject(MetadataScanner)
     private metadataScanner: MetadataScanner,
-    @Inject(HttpAdapterHost)
-    private readonly adapter: HttpAdapterHost,
     @Inject(AUTH_MODULE_OPTIONS_KEY)
     private readonly options: AuthModuleOptions
   ) {}
@@ -91,29 +88,10 @@ export class AuthModule implements NestModule, OnModuleInit {
 
   configure(consumer: MiddlewareConsumer) {
     if (!this.options.disableBodyParser) {
-      consumer.apply(SkipBodyParsingMiddleware).forRoutes('{*path}')
+      consumer.apply(SkipBodyParsingMiddleware).forRoutes('*')
     }
 
-    // Get basePath from options or use default
-    let basePath = this.auth.options.basePath ?? '/api/auth'
-
-    // Ensure basePath starts with /
-    if (!basePath.startsWith('/')) {
-      basePath = '/' + basePath
-    }
-
-    // Ensure basePath doesn't end with /
-    if (basePath.endsWith('/')) {
-      basePath = basePath.slice(0, -1)
-    }
-
-    // Create the better-auth handler
-    const handler = toNodeHandler(this.auth)
-
-    // Mount the handler directly - let better-auth handle everything
-    this.adapter.httpAdapter.getInstance().use(basePath + '/*', handler)
-
-    this.logger.log(`AuthModule initialized BetterAuth on '${basePath}/*'`)
+    this.logger.log('AuthModule initialized with AuthController handling /api/auth/* routes')
   }
 
   // biome-ignore lint/complexity/noBannedTypes: <explanation>
@@ -170,6 +148,7 @@ export class AuthModule implements NestModule, OnModuleInit {
           const db = client.db()
 
           return betterAuth({
+            basePath: '/api/auth',
             trustedOrigins,
             database: mongodbAdapter(db),
             emailAndPassword: {
@@ -203,7 +182,7 @@ export class AuthModule implements NestModule, OnModuleInit {
                     //   domain: configService.get<string>('CROSS_DOMAIN_ORIGIN'),
                     // },
                     defaultCookieAttributes: {
-                      secure: true,
+                      secure: false,
                       httpOnly: false,
                       sameSite: 'none',
                       partitioned: true,
