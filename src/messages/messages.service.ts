@@ -21,7 +21,8 @@ export class MessagesService {
     await this.alertsService.checkAndNotify({
       deviceId: saved.deviceId,
       temperature: saved.temperature,
-      timestamp: saved.timestamp,
+      // timestamp: saved.timestamp,
+      timestamp: new Date(),
     })
     return saved
   }
